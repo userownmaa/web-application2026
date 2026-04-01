@@ -1,0 +1,149 @@
+
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Данные текущего запроса</h1>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">Форма авторизации</h5>
+        </div>
+        <div class="card-body">
+            <form method="POST" class="row g-3">
+                <div class="col-md-5">
+                    <label for="username" class="form-label">Логин / Email</label>
+                    <input type="text" class="form-control" id="username" name="username" required placeholder="Введите логин">
+                </div>
+                <div class="col-md-5">
+                    <label for="password" class="form-label">Пароль</label>
+                    <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary w-100">Войти</button>
+                </div>
+            </form>
+            <small class="text-muted d-block mt-2">
+                После отправки данные появятся в блоке «Данные формы (POST)» ниже + flash-сообщение
+            </small>
+        </div>
+    </div>
+
+    <!-- Flashed messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mb-4">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="row g-4">
+
+        <!-- <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Метод и адрес</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Метод:</strong> {{ data.method }}</p>
+                    <p><strong>URL:</strong> <code>{{ data.url }}</code></p>
+                </div>
+            </div>
+        </div> -->
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Параметры URL (GET)</h5>
+                </div>
+                <div class="card-body">
+                    {% if data.args %}
+                        <ul class="list-group list-group-flush">
+                            {% for key, value in data.args.items() %}
+                                <li class="list-group-item">
+                                    <strong>{{ key }}:</strong> {{ value }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Нет GET-параметров</p>
+                        <small class="text-muted">Добавь в адрес, например: ?user=antonina&group=241-327</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Данные формы (POST)</h5>
+                </div>
+                <div class="card-body">
+                    {% if data.form %}
+                        <ul class="list-group list-group-flush">
+                            {% for key, value in data.form.items() %}
+                                <li class="list-group-item">
+                                    <strong>{{ key }}:</strong> {{ value }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Форма не отправлялась</p>
+                        <small class="text-muted">Отправь любую форму (например авторизацию), данные появятся здесь</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Заголовки запроса</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        {% for key, value in data.headers.items() %}
+                            <li class="list-group-item">
+                                <strong>{{ key }}:</strong> <small>{{ value }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0">Cookies</h5>
+                </div>
+                <div class="card-body">
+                    {% if data.cookies %}
+                        <ul class="list-group list-group-flush">
+                            {% for key, value in data.cookies.items() %}
+                                <li class="list-group-item">
+                                    <strong>{{ key }}:</strong> {{ value }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted mb-0">Cookies отсутствуют</p>
+                        <small class="text-muted">При обновлении страницы появится тестовое cookie</small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    
+</div>
+{% endblock %}
