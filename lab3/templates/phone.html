@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container my-5">
+
+    <h1 class="mb-4">Проверка номера телефона</h1>
+
+    <form method="POST" class="w-50">
+        <div class="mb-3">
+            <label for="phone" class="form-label">Номер телефона</label>
+            <input type="text"
+                class="form-control {% if error %}is-invalid{% endif %}"
+                id="phone"
+                name="phone"
+                value="{{ phone }}"
+                placeholder="+7 (999) 123-45-67 или 8123456789"
+                required>
+            {% if error %}
+                <div class="invalid-feedback">
+                    {{ error }}
+                </div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Проверить</button>
+    </form>
+
+    {% if is_valid %}
+        <div class="alert alert-success mt-4">
+            <h5>Номер валидный!</h5>
+            <p>Исходный: <strong>{{ phone }}</strong></p>
+            <p>Форматированный: <strong>{{ formatted }}</strong></p>
+        </div>
+    {% endif %}
+
+    <p class="mt-4 text-muted">
+        Номер должен содержать 10-11 цифр и может включать символы: пробелы, круглые скобки, дефисы, точки, +.
+        Ниже представлены примеры допустимых форматов ввода номера телефона.
+    </p>
+
+    <ul class="mt-4 text-muted">
+        <li>+7 (123) 456-75-90</li>
+        <li>8(123)4567590</li>
+        <li>123.456.75.90</li>
+    </ul>
+
+</div>
+
+{% endblock %}
