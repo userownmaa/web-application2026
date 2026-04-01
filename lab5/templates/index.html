@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h1 class="mb-4">Пользователи системы</h1>
+
+    <div class="table-responsive">
+        <table class="table table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">ФИО</th>
+                    <th scope="col">Роль</th>
+                    <th scope="col">Действия</th>
+                </thead>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <th scope="row">{{ loop.index }}</th>
+                    <td>{{ user.get_full_name() }}</td>
+                    <td>
+                        {% if user.role %}
+                            {{ user.role.name }}
+                        {% else %}
+                            <span class="text-muted">— нет роли —</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if current_user.role and current_user.role.name == 'Администратор' %}
+                            <a href="{{ url_for('view_user', user_id=user.id) }}" 
+                               class="btn btn-sm btn-outline-primary me-1">Просмотр</a>
+                            
+                            <a href="{{ url_for('edit_user', user_id=user.id) }}" 
+                               class="btn btn-sm btn-outline-warning me-1">Изменить</a>
+                            
+                            <button type="button" class="btn btn-sm btn-outline-danger"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#deleteModal"
+                                    data-user-id="{{ user.id }}"
+                                    data-user-name="{{ user.get_full_name() | e }}">
+                                Удалить
+                            </button>
+                        
+                        {% elif current_user.id == user.id %}
+                            <a href="{{ url_for('view_user', user_id=user.id) }}" 
+                               class="btn btn-sm btn-outline-primary me-1">Просмотр</a>
+                            
+                            <a href="{{ url_for('edit_user', user_id=user.id) }}" 
+                               class="btn btn-sm btn-outline-warning">Изменить</a>
+                        
+                        {% else %}
+                            <span class="text-muted">— нет доступа —</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">Пользователи отсутствуют</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if current_user.is_authenticated and current_user.role and current_user.role.name == 'Администратор' %}
+        <div class="mt-4">
+            <a href="{{ url_for('create_user') }}" class="btn btn-primary">Добавить пользователя</a>
+        </div>
+    {% endif %}
+
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteModalLabel">Подтверждение удаления</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Вы действительно хотите удалить пользователя <strong id="modalUserName"></strong>?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                    <form id="deleteForm" method="POST" action="">
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const modal = document.getElementById('deleteModal');
+            modal.addEventListener('show.bs.modal', function (event) {
+                const button = event.relatedTarget;
+                const userId = button.getAttribute('data-user-id');
+                const userName = button.getAttribute('data-user-name');
+
+                document.getElementById('modalUserName').textContent = userName || 'пользователя';
+                document.getElementById('deleteForm').action = 
+                    "{{ url_for('delete_user', user_id=0) }}".replace('/0', '/' + userId);
+            });
+        });
+    </script>
+{% endblock %}
