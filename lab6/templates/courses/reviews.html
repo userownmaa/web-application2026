@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% from 'pagination.html' import render_pagination %}
+
+{% block content %}
+<div class="container mt-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb bg-light p-3 rounded-3">
+            <li class="breadcrumb-item"><a href="{{ url_for('index') }}" class="text-decoration-none">Главная</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.index') }}" class="text-decoration-none">Курсы</a></li>
+            <li class="breadcrumb-item"><a href="{{ url_for('courses.show', course_id=course.id) }}" class="text-decoration-none">{{ course.name }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Отзывы</li>
+        </ol>
+    </nav>
+
+    <h2 class="mb-4 text-center text-uppercase font-weight-bold position-relative">
+        <span class="bg-white px-3">Отзывы о курсе "{{ course.name }}"</span>
+    </h2>
+    <div class="border-top border-2 border-dark mb-5" style="margin-top: -20px !important;"></div>
+    
+    {% if current_user.is_authenticated and not user_review %}
+        <div class="row mb-5">
+            <div class="col-lg-8 mx-auto">
+                <div class="card border-0 shadow-sm rounded-4 bg-gradient">
+                    <div class="card-body p-4">
+                        <h4 class="mb-3 text-center">Оставьте ваш отзыв</h4>
+                        <form method="POST" action="{{ url_for('courses.create_review', course_id=course.id, next='reviews') }}">
+                            <div class="mb-3">
+                                <label for="rating" class="form-label fw-bold">Оценка</label>
+                                <select class="form-select border-2" name="rating" id="rating" required>
+                                    <option value="5">5 ★★★★★ - Отлично</option>
+                                    <option value="4">4 ★★★★☆ - Хорошо</option>
+                                    <option value="3">3 ★★★☆☆ - Удовлетворительно</option>
+                                    <option value="2">2 ★★☆☆☆ - Неудовлетворительно</option>
+                                    <option value="1">1 ★☆☆☆☆ - Плохо</option>
+                                    <option value="0">0 ☆☆☆☆☆ - Ужасно</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="text" class="form-label fw-bold">Текст отзыва</label>
+                                <textarea class="form-control border-2" name="text" id="text" rows="4" placeholder="Поделитесь своим мнением..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-dark w-100 py-2 rounded-pill">Отправить отзыв</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="row mb-4">
+        <div class="col-md-6 mx-auto">
+            <form method="GET" class="d-flex gap-2 bg-light p-3 rounded-3">
+                <select class="form-select border-2" name="sort" id="sort">
+                    <option value="new" {% if sort_by == 'new' %}selected{% endif %}>Сначала новые</option>
+                    <option value="positive" {% if sort_by == 'positive' %}selected{% endif %}>Сначала положительные</option>
+                    <option value="negative" {% if sort_by == 'negative' %}selected{% endif %}>Сначала отрицательные</option>
+                </select>
+                <button type="submit" class="btn btn-dark px-4 rounded-pill">Применить</button>
+            </form>
+        </div>
+    </div>
+
+    {% if reviews %}
+        <div class="row">
+            {% for review in reviews %}
+                <div class="col-12 mb-4">
+                    <div class="card border-0 shadow-sm rounded-3 review-card">
+                        <div class="card-header bg-white border-0 pt-3 d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-dark text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 40px; height: 40px;">
+                                    <span>{{ review.user.first_name[0] }}{{ review.user.last_name[0] }}</span>
+                                </div>
+                                <div>
+                                    <strong class="fs-5">{{ review.user.full_name }}</strong>
+                                    <span class="text-muted ms-2">{{ review.created_at.strftime('%d.%m.%Y %H:%M') }}</span>
+                                </div>
+                            </div>
+                            <div class="rating">
+                                {% for i in range(5) %}
+                                    {% if i < review.rating %}
+                                        <span class="text-warning fs-4">★</span>
+                                    {% else %}
+                                        <span class="text-secondary fs-4">★</span>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2 badge bg-dark fs-6">{{ review.rating }}/5</span>
+                            </div>
+                        </div>
+                        <div class="card-body pt-2 pb-4">
+                            <p class="card-text fs-5">{{ review.text }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="mb-5">
+            {{ render_pagination(pagination, 'courses.reviews', {'course_id': course.id, 'sort': sort_by}) }}
+        </div>
+    {% else %}
+        <div class="text-center py-5 my-4 bg-light rounded-4">
+            <p class="text-muted fs-4 mb-0">Пока нет отзывов. Будьте первым!</p>
+        </div>
+    {% endif %}
+
+    <div class="text-center mt-4 mb-5">
+        <a href="{{ url_for('courses.show', course_id=course.id) }}" class="btn btn-outline-dark px-5 py-2 rounded-pill">
+            ← Вернуться к курсу
+        </a>
+    </div>
+</div>
+
+<style>
+    .review-card {
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    .review-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+    }
+    .border-2 {
+        border-width: 2px !important;
+    }
+    .bg-gradient {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    }
+    .rounded-pill {
+        border-radius: 50px !important;
+    }
+</style>
+{% endblock %}
